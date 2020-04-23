@@ -44,17 +44,27 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-	print(f'''received message {message.content} from member {message.author.name} with id {message.author.id}''')
+	if message.author.name == 'releases':
+		return
 
+	print(f'''received message {message.content} from member {message.author.name} with id {message.author.id}''')
 	command, email = str(message.content).split(' ')
 	if command == '!getalpha' and re.search(email_regex, email):
 		print(f'''member {message.author.name} has requested to join the alpha using email {email}''')
 		res = getalpha(message.author.id, message.author.name, email)
 
 		if res is not False:
+			for guild in client.guilds:
+				if guild.name != DISCORD_GUILD:
+					continue
+
+				for member in guild.members:
+					if member.name in admin_names:
+						channel = await member.create_dm()
+						await channel.send(f'member {message.author.name} was unable to register for the alpha')
+
 			channel = await message.author.create_dm()
 			await channel.send(res)
-
 
 oculus_email_path = '//*[@id="email"]'
 oculus_password_path = '//*[@id="password"]'
