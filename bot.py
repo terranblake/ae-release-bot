@@ -27,9 +27,10 @@ app.config["DEBUG"] = True
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 DISCORD_GUILD = os.getenv('DISCORD_GUILD')
-admin_names = ['TE-renBLAYK']
+admins = ['392451737224478730', '223459377280057344']
 
 email_regex = r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+success_message = f'''check your inbox for an email from Oculus with the subject [Release Channel Offering from TopVR on Oculus]'''
 
 
 @app.route('/', methods=['GET'])
@@ -59,12 +60,13 @@ async def on_message(message):
 					continue
 
 				for member in guild.members:
-					if member.name in admin_names:
+					if str(member.id) in admins:
 						channel = await member.create_dm()
-						await channel.send(f'member {message.author.name} was unable to register for the alpha')
+						await channel.send(f'member {message.author.name} {message.author.id} was unable to register for the alpha because error: {res}')
 
-			channel = await message.author.create_dm()
-			await channel.send(res)
+		result_message = success_message if res is False else res
+		channel = await message.author.create_dm()
+		await channel.send(result_message)
 
 oculus_email_path = '//*[@id="email"]'
 oculus_password_path = '//*[@id="password"]'
@@ -91,7 +93,6 @@ def getalpha(discordid, name, email):
 	# credentials for logging into oculus site
 	OCULUS_EMAIL = os.getenv('OCULUS_EMAIL')
 	OCULUS_PASSWORD = os.getenv('OCULUS_PASSWORD')
-
 	OCULUS_BUILD_URL = os.getenv('OCULUS_BUILD_URL')
 
 	try:
@@ -145,7 +146,6 @@ def getalpha(discordid, name, email):
 
 	# Save (commit) the changes
 	conn.commit()
-	conn.close()
 
 	browser.quit()
 	return False
